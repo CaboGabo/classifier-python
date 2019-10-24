@@ -3,7 +3,7 @@ const fs = require("fs");
 function getDataset(filename) {
   fs.readFile(`./datasets/${filename}.txt`, "utf8", (err, data) => {
     if (err) throw err;
-    let phrases = "";
+    let phrases = [];
     let lines = [];
     let string = "";
     for (const letter of data) {
@@ -24,7 +24,10 @@ function getDataset(filename) {
         .split(")")[0]
         .split(",");
 
-      phrases += `${text} ${tag}\n`;
+      phrases.push(JSON.stringify({
+        text,
+        tag
+      }));
     }
 
     fs.writeFile(`./outputs/${filename}.txt`, phrases, err => {
