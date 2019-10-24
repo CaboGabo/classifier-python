@@ -1,16 +1,25 @@
 import json
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.probability import FreqDist
+import random
+import math
+import nltk
 
-a2=open('outputs/datasetA2.json', 'r', encoding='utf8')
-a3=open('outputs/datasetA3.json', 'r', encoding='utf8')
-a4=open('outputs/datasetA4.json', 'r', encoding='utf8')
-a6=open('outputs/datasetA6.json', 'r', encoding='utf8')
-a7=open('outputs/datasetA7.json', 'r', encoding='utf8')
-a8=open('outputs/datasetA8.json', 'r', encoding='utf8')
-a9=open('outputs/datasetA9.json', 'r', encoding='utf8')
-b1=open('outputs/datasetB1.json', 'r', encoding='utf8')
-b4=open('outputs/datasetB4.json', 'r', encoding='utf8')
-b6=open('outputs/datasetB6.json', 'r', encoding='utf8')
-c1=open('outputs/datasetC1.json', 'r', encoding='utf8')
+stop_words = set(stopwords.words('spanish'))
+
+# Código que carga los json, y los lee
+a2 = open('outputs/datasetA2.json', 'r', encoding='utf8')
+a3 = open('outputs/datasetA3.json', 'r', encoding='utf8')
+a4 = open('outputs/datasetA4.json', 'r', encoding='utf8')
+a6 = open('outputs/datasetA6.json', 'r', encoding='utf8')
+a7 = open('outputs/datasetA7.json', 'r', encoding='utf8')
+a8 = open('outputs/datasetA8.json', 'r', encoding='utf8')
+a9 = open('outputs/datasetA9.json', 'r', encoding='utf8')
+b1 = open('outputs/datasetB1.json', 'r', encoding='utf8')
+b4 = open('outputs/datasetB4.json', 'r', encoding='utf8')
+b6 = open('outputs/datasetB6.json', 'r', encoding='utf8')
+c1 = open('outputs/datasetC1.json', 'r', encoding='utf8')
 
 texta2 = a2.read()
 texta3 = a3.read()
@@ -24,27 +33,87 @@ textb4 = b4.read()
 textb6 = b6.read()
 textc1 = c1.read()
 
+objsa2 = json.loads(texta2)
+objsa3 = json.loads(texta3)
+objsa4 = json.loads(texta4)
+objsa6 = json.loads(texta6)
+objsa7 = json.loads(texta7)
+objsa8 = json.loads(texta8)
+objsa9 = json.loads(texta9)
+objsb1 = json.loads(textb1)
+objsb4 = json.loads(textb4)
+objsb6 = json.loads(textb6)
+objsc1 = json.loads(textc1)
 
-obja2 = json.loads(texta2)
-obja3 = json.loads(texta3)
-obja4 = json.loads(texta4)
-obja6 = json.loads(texta6)
-obja7 = json.loads(texta7)
-obja8 = json.loads(texta8)
-obja9 = json.loads(texta9)
-objb1 = json.loads(textb1)
-objb4 = json.loads(textb4)
-objb6 = json.loads(textb6)
-objc1 = json.loads(textc1)
 
-print(len(obja2))
-print(len(obja3))
-print(len(obja4))
-print(len(obja6))
-print(len(obja7))
-print(len(obja8))
-print(len(obja9))
-print(len(objb1))
-print(len(objb4))
-print(len(objb6))
-print(len(objc1))
+# Función que quita las palabras que no son relevantes dentro de las frases
+def removeWords(tokenized_word):
+    filtered_sent = []
+    for w in tokenized_word:
+        if w not in stop_words:
+            filtered_sent.append(w)
+    return filtered_sent
+
+
+# Función que obtiene la cadena tokenizada
+def getTokenizedText(arrayObj):
+    for obj in arrayObj:
+        tokenized_text = word_tokenize(obj['text'])
+        obj['text'] = removeWords(tokenized_text)
+    return arrayObj
+
+# Función que obtiene todas las palabras usadas en el conjunto de entrenamiento
+
+
+def getAllWords(arrayObjTokenized):
+    words = []
+    for obj in arrayObjTokenized:
+        for w in obj['text']:
+            words.append(w.lower())
+    return words
+
+# Función que acomoda la info para ser procesada
+
+
+def documentFeatures(obj, word_features):
+    features = {}
+    document_words = set(obj['text'])
+    for word in word_features:
+        features['contains(%s)' % word] = (word in document_words)
+    features['score'] = obj['score']
+    features['magnitude'] = obj['magnitude']
+    return features
+
+# Función que entrena el clasificador
+
+
+def getClassifier(objArray):
+    random.shuffle(objArray)
+    objArray = getTokenizedText(objArray)
+    all_words = FreqDist(getAllWords(objArray))
+
+    word_features = list(all_words.keys())[:200]
+
+    featuresets = []
+    for document in objArray:
+        featuresets += [(documentFeatures(document,
+                                          word_features), document['tag'])]
+
+    train_set_len = math.floor(len(featuresets)*0.1)
+    train_set, test_set = featuresets[train_set_len:], featuresets[:train_set_len]
+    classifier = nltk.NaiveBayesClassifier.train(train_set)
+    print(nltk.classify.accuracy(classifier, test_set))
+    return classifier
+
+
+classifiera2 = getClassifier(objsa2)
+classifiera3 = getClassifier(objsa3)
+classifiera4 = getClassifier(objsa4)
+classifiera6 = getClassifier(objsa6)
+classifiera7 = getClassifier(objsa7)
+classifiera8 = getClassifier(objsa8)
+classifiera9 = getClassifier(objsa9)
+classifierb1 = getClassifier(objsb1)
+classifierb4 = getClassifier(objsb4)
+classifierb6 = getClassifier(objsb6)
+classifierc1 = getClassifier(objsc1)

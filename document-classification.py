@@ -12,11 +12,9 @@ random.shuffle(documents)
 
 all_words = FreqDist(w.lower() for w in movie_reviews.words())
 word_features = list(all_words.keys())[:2000]
-for w in word_features:
-    print(w)
 
 
-"""def document_features(document):
+def document_features(document):
     document_words = set(document)
     features = {}
     for word in word_features:
@@ -29,4 +27,4 @@ train_set, test_set = featuresets[100:], featuresets[:100]
 classifier = nltk.NaiveBayesClassifier.train(train_set)
 print(len(train_set))
 print(nltk.classify.accuracy(classifier, test_set))
-classifier.show_most_informative_features(5)"""
+classifier.show_most_informative_features(5)
