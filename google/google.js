@@ -1,8 +1,7 @@
-const language = require('@google-cloud/language');
-
-const client = new language.LanguageServiceClient();
-
 async function analyze(text) {
+    const language = require('@google-cloud/language');
+
+    const client = new language.LanguageServiceClient();
     const document = {
         content: text,
         type: 'PLAIN_TEXT'
