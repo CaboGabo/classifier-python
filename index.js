@@ -19,10 +19,13 @@ function getDataset(filename) {
     }
 
     for (const line of lines) {
-      const [text, tag] = line
+      let [text, tag] = line
         .split("manager.addDocument('es',")[1]
         .split(")")[0]
         .split(",");
+
+      text = text.slice(2, -1);
+      tag = tag.slice(2, -1);
 
       phrases.push(JSON.stringify({
         text,
