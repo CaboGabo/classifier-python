@@ -40,4 +40,8 @@ function getDataset(filename) {
   });
 }
 
-getDataset("datasetA2");
+let fileNames = [];
+
+for (const filename in fileNames) {
+  getDataset(filename);
+}
