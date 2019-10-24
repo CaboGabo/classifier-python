@@ -1,7 +1,10 @@
 const fs = require("fs");
+const {
+  analyze
+} = require('./google/google');
 
 function getDataset(filename) {
-  fs.readFile(`./datasets/${filename}.txt`, "utf8", (err, data) => {
+  fs.readFile(`./datasets/${filename}.txt`, "utf8", async (err, data) => {
     if (err) throw err;
     let phrases = [];
     let lines = [];
@@ -27,8 +30,11 @@ function getDataset(filename) {
       text = text.slice(2, -1);
       tag = tag.slice(2, -1);
 
+      const results = await analyze(text);
+
       phrases.push(JSON.stringify({
         text,
+        ...results,
         tag
       }));
     }
@@ -40,7 +46,8 @@ function getDataset(filename) {
   });
 }
 
-let fileNames = ['datasetA2', 'datasetA3', 'datasetA4', 'datasetA6', 'datasetA7', 'datasetA8', 'datasetA9', 'datasetB1', 'datasetB4', 'datasetB6', 'datasetC1'];
+getDataset('datasetA2');
+/*let fileNames = ['datasetA2', 'datasetA3', 'datasetA4', 'datasetA6', 'datasetA7', 'datasetA8', 'datasetA9', 'datasetB1', 'datasetB4', 'datasetB6', 'datasetC1'];
 for (const filename of fileNames) {
   getDataset(filename);
-}
+}*/
