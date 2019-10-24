@@ -2,6 +2,7 @@ import json
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.probability import FreqDist
+from nltk.stem.snowball import SnowballStemmer
 import random
 import math
 import nltk
@@ -77,7 +78,8 @@ def getAllWords(arrayObjTokenized):
 
 def documentFeatures(obj, word_features):
     features = {}
-    document_words = set(obj['text'])
+    [objStemmed] = stemming([obj])
+    document_words = set(objStemmed['text'])
     for word in word_features:
         features['contains(%s)' % word] = (word in document_words)
     features['score'] = obj['score']
@@ -87,9 +89,21 @@ def documentFeatures(obj, word_features):
 # Función que entrena el clasificador
 
 
+def stemming(objArray):
+    stemmer = SnowballStemmer('spanish')
+    for obj in objArray:
+        stemmed_words = []
+        for w in obj['text']:
+            stemmed_words.append(stemmer.stem(w))
+
+        obj['text'] = stemmed_words
+
+    return objArray
+
+
 def getClassifier(objArray):
     random.shuffle(objArray)
-    objArray = getTokenizedText(objArray)
+    objArray = stemming(getTokenizedText(objArray))
     all_words = FreqDist(getAllWords(objArray))
 
     word_features = list(all_words.keys())[:200]
@@ -102,18 +116,20 @@ def getClassifier(objArray):
     train_set_len = math.floor(len(featuresets)*0.1)
     train_set, test_set = featuresets[train_set_len:], featuresets[:train_set_len]
     classifier = nltk.NaiveBayesClassifier.train(train_set)
-    print(nltk.classify.accuracy(classifier, test_set))
-    return classifier
+    #print(nltk.classify.accuracy(classifier, test_set))
+    return [classifier, word_features]
 
 
-classifiera2 = getClassifier(objsa2)
-classifiera3 = getClassifier(objsa3)
-classifiera4 = getClassifier(objsa4)
-classifiera6 = getClassifier(objsa6)
-classifiera7 = getClassifier(objsa7)
-classifiera8 = getClassifier(objsa8)
-classifiera9 = getClassifier(objsa9)
-classifierb1 = getClassifier(objsb1)
-classifierb4 = getClassifier(objsb4)
-classifierb6 = getClassifier(objsb6)
-classifierc1 = getClassifier(objsc1)
+classifiers = [getClassifier(objsa2), getClassifier(objsa3), getClassifier(objsa4), getClassifier(objsa6), getClassifier(objsa7), getClassifier(
+    objsa8), getClassifier(objsa9), getClassifier(objsb1), getClassifier(objsb4), getClassifier(objsb6), getClassifier(objsc1)]
+
+
+test = {
+    "text": 'Muy buenas a todos, guapísimos :v',
+    "score": 0.8,
+    "magnitude": 0.8
+}
+
+for classifier in classifiers:
+    test_document = documentFeatures(test, classifier[1])
+    print(classifier[0].classify(test_document))
