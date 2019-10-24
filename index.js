@@ -46,12 +46,3 @@ function getDataset(filename) {
     });
   });
 }
-
-let fileNames = ['datasetA2', 'datasetA3', 'datasetA4', 'datasetA6',
-  'datasetA7', 'datasetA8', 'datasetA9', 'datasetB1',
-  'datasetB4', 'datasetB6', 'datasetC1',
-];
-
-for (let filename in fileNames) {
-  getDataset(fileNames[filename]);
-}
