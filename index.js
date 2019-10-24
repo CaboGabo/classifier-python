@@ -3,7 +3,7 @@ const fs = require("fs");
 function getDataset(filename) {
   fs.readFile(`./datasets/${filename}.txt`, "utf8", (err, data) => {
     if (err) throw err;
-    let phrases = "";
+    let phrases = [];
     let lines = [];
     let string = "";
     for (const letter of data) {
@@ -19,12 +19,18 @@ function getDataset(filename) {
     }
 
     for (const line of lines) {
-      const [text, tag] = line
+      let [text, tag] = line
         .split("manager.addDocument('es',")[1]
         .split(")")[0]
         .split(",");
 
-      phrases += `${text} ${tag}\n`;
+      text = text.slice(2, -1);
+      tag = tag.slice(2, -1);
+
+      phrases.push(JSON.stringify({
+        text,
+        tag
+      }));
     }
 
     fs.writeFile(`./outputs/${filename}.txt`, phrases, err => {
@@ -34,4 +40,8 @@ function getDataset(filename) {
   });
 }
 
-getDataset("datasetA2");
+let fileNames = [];
+
+for (const filename in fileNames) {
+  getDataset(filename);
+}
