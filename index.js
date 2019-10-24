@@ -20,6 +20,9 @@ function getDataset(filename) {
     }
 
     for (const line of lines) {
+      if (line.startsWith("//") || line === "\n") {
+        continue;
+      }
       let [text, tag] = line
         .split("manager.addDocument('es',")[1]
         .split(")")[0]
@@ -44,8 +47,11 @@ function getDataset(filename) {
   });
 }
 
-getDataset('datasetA2');
-/*let fileNames = ['datasetA2', 'datasetA3', 'datasetA4', 'datasetA6', 'datasetA7', 'datasetA8', 'datasetA9', 'datasetB1', 'datasetB4', 'datasetB6', 'datasetC1'];
-for (const filename of fileNames) {
-  getDataset(filename);
-}*/
+let fileNames = ['datasetA2', 'datasetA3', 'datasetA4', 'datasetA6',
+  'datasetA7', 'datasetA8', 'datasetA9', 'datasetB1',
+  'datasetB4', 'datasetB6', 'datasetC1',
+];
+
+for (let filename in fileNames) {
+  getDataset(fileNames[filename]);
+}
